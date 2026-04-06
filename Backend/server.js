@@ -13,9 +13,9 @@ const authRoutes = require("./routes/auth");
 
 const app = express();
 
-// ✅ CORS setup
+// ✅ CORS setup - updated with correct frontend URL
 const allowedOrigins = [
-  "https://campus-eventhub-team4.vercel.app",
+  "https://event-hub-dun-mu.vercel.app",   // ← your actual frontend
   "http://localhost:5173",
 ];
 
@@ -39,7 +39,6 @@ let isConnected = false;
 
 const connectDB = async () => {
   if (isConnected) return;
-
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI);
     isConnected = true;
@@ -67,7 +66,6 @@ app.use("/api/registrations", registrationRoutes);
 app.use("/api/feedbacks", feedbackRoutes);
 app.use("/api/adminlogs", adminLogRoutes);
 
-// Test route
 app.get("/", (req, res) => {
   res.send("Campus EventHub API is running ✅");
 });
