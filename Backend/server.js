@@ -15,7 +15,7 @@ const app = express();
 
 // ✅ CORS setup - updated with correct frontend URL
 const allowedOrigins = [
-  "https://event-hub-dun-mu.vercel.app",   // ← your actual frontend
+  "https://gkeventhub.vercel.app/",   // ← your actual frontend
   "http://localhost:5173",
 ];
 
