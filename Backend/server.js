@@ -1,9 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const dotenv = require("dotenv");
 
-dotenv.config();
+// ⚠️ Do NOT use dotenv on Vercel — it reads env vars directly
+// Only load dotenv in local development
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
 
 const eventRoutes = require("./routes/eventRoutes");
 const registrationRoutes = require("./routes/registrationRoutes");
@@ -13,9 +16,9 @@ const authRoutes = require("./routes/auth");
 
 const app = express();
 
-// ✅ CORS setup - updated with correct frontend URL
+// ✅ CORS — no trailing slash!
 const allowedOrigins = [
-  "https://gkeventhub.vercel.app/",   // ← your actual frontend
+  "https://event-hub-dun-mu.vercel.app",
   "http://localhost:5173",
 ];
 
@@ -34,28 +37,24 @@ app.use(
 
 app.use(express.json());
 
-// ✅ MongoDB connection (works for both local + Vercel)
+// ✅ MongoDB connection with caching
 let isConnected = false;
 
 const connectDB = async () => {
   if (isConnected) return;
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    console.log("MONGODB_URI:", process.env.MONGODB_URI ? "Found ✅" : "Missing ❌");
+    await mongoose.connect(process.env.MONGODB_URI);
     isConnected = true;
-    console.log("MongoDB Connected:", conn.connection.host);
+    console.log("MongoDB Connected ✅");
   } catch (error) {
     console.error("MongoDB connection error:", error.message);
   }
 };
 
-// ✅ CONNECT IMMEDIATELY (for local dev)
-connectDB();
-
-// ✅ ALSO ensure connection in serverless (Vercel)
+// ✅ Connect on every request (serverless safe)
 app.use(async (req, res, next) => {
-  if (!isConnected) {
-    await connectDB();
-  }
+  await connectDB();
   next();
 });
 
@@ -70,15 +69,13 @@ app.get("/", (req, res) => {
   res.send("Campus EventHub API is running ✅");
 });
 
-// ✅ EXPORT for Vercel
+// ✅ Export for Vercel
 module.exports = app;
 
-// ✅ RUN SERVER ONLY IN LOCAL (NOT in Vercel)
-const PORT = process.env.PORT || 5000;
-
+// ✅ Local development only
 if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
-} 
- 
+}
