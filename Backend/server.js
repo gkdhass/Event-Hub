@@ -2,8 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-// ⚠️ Do NOT use dotenv on Vercel — it reads env vars directly
-// Only load dotenv in local development
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
@@ -16,8 +14,9 @@ const authRoutes = require("./routes/auth");
 
 const app = express();
 
-// ✅ CORS — no trailing slash!
+// ✅ CORS — updated with all frontend URLs
 const allowedOrigins = [
+  "https://gkeventhub.vercel.app",
   "https://event-hub-dun-mu.vercel.app",
   "http://localhost:5173",
 ];
@@ -37,7 +36,6 @@ app.use(
 
 app.use(express.json());
 
-// ✅ MongoDB connection with caching
 let isConnected = false;
 
 const connectDB = async () => {
@@ -52,13 +50,11 @@ const connectDB = async () => {
   }
 };
 
-// ✅ Connect on every request (serverless safe)
 app.use(async (req, res, next) => {
   await connectDB();
   next();
 });
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/registrations", registrationRoutes);
@@ -69,10 +65,8 @@ app.get("/", (req, res) => {
   res.send("Campus EventHub API is running ✅");
 });
 
-// ✅ Export for Vercel
 module.exports = app;
 
-// ✅ Local development only
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
